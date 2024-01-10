@@ -99,26 +99,47 @@ class RelabelLanguage(TfdsModFunction):
             cls,
             features: tfds.features.FeaturesDict,
     ) -> tfds.features.FeaturesDict:
-        features["steps"]["language_instruction_relabel_0"] = tfds.features.Text()
-        features["steps"]["language_instruction_relabel_1"] = tfds.features.Text()
-        features["steps"]["language_instruction_relabel_2"] = tfds.features.Text()
-        features["steps"]["language_instruction_relabel_3"] = tfds.features.Text()
-        features["steps"]["language_instruction_relabel_4"] = tfds.features.Text()
-        features["steps"]["language_instruction_relabel_5"] = tfds.features.Text()
-        features["steps"]["language_instruction_relabel_6"] = tfds.features.Text()
-        features["steps"]["language_instruction_relabel_7"] = tfds.features.Text()
-        features["steps"]["language_instruction_relabel_8"] = tfds.features.Text()
-        features["steps"]["language_instruction_relabel_9"] = tfds.features.Text()
-        features["steps"]["language_instruction_negative_0"] = tfds.features.Text()
-        features["steps"]["language_instruction_negative_1"] = tfds.features.Text()
-        features["steps"]["language_instruction_negative_2"] = tfds.features.Text()
-        features["steps"]["language_instruction_negative_3"] = tfds.features.Text()
-        features["steps"]["language_instruction_negative_4"] = tfds.features.Text()
-        features["steps"]["language_instruction_negative_5"] = tfds.features.Text()
-        features["steps"]["language_instruction_negative_6"] = tfds.features.Text()
-        features["steps"]["language_instruction_negative_7"] = tfds.features.Text()
-        features["steps"]["language_instruction_negative_8"] = tfds.features.Text()
-        features["steps"]["language_instruction_negative_9"] = tfds.features.Text()
+        return tfds.features.FeaturesDict(
+            {
+                "steps": tfds.features.Dataset(
+                    {
+                        "observation": tfds.features.FeaturesDict(
+                            {
+                                key: features["steps"]["observation"][key]
+                                for key in features["steps"]["observation"].keys()
+                            }
+                        ),
+                        **{
+                            key: features["steps"][key]
+                            for key in features["steps"].keys()
+                            if key not in ("observation",)
+                        },
+                        "language_instruction_relabel_0": tfds.features.Text(),
+                        "language_instruction_relabel_1": tfds.features.Text(),
+                        "language_instruction_relabel_2": tfds.features.Text(),
+                        "language_instruction_relabel_3": tfds.features.Text(),
+                        "language_instruction_relabel_4": tfds.features.Text(),
+                        "language_instruction_relabel_5": tfds.features.Text(),
+                        "language_instruction_relabel_6": tfds.features.Text(),
+                        "language_instruction_relabel_7": tfds.features.Text(),
+                        "language_instruction_relabel_8": tfds.features.Text(),
+                        "language_instruction_relabel_9": tfds.features.Text(),
+                        "language_instruction_negative_0": tfds.features.Text(),
+                        "language_instruction_negative_1": tfds.features.Text(),
+                        "language_instruction_negative_2": tfds.features.Text(),
+                        "language_instruction_negative_3": tfds.features.Text(),
+                        "language_instruction_negative_4": tfds.features.Text(),
+                        "language_instruction_negative_5": tfds.features.Text(),
+                        "language_instruction_negative_6": tfds.features.Text(),
+                        "language_instruction_negative_7": tfds.features.Text(),
+                        "language_instruction_negative_8": tfds.features.Text(),
+                        "language_instruction_negative_9": tfds.features.Text(),
+                    }
+                ),
+                **{key: features[key] for key in features.keys() if key not in ("steps",)},
+            }
+        )
+
         return features
 
     @classmethod
