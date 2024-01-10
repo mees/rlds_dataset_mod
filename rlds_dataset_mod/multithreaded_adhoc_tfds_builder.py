@@ -121,7 +121,7 @@ def parse_examples_from_generator(
     episodes, max_episodes, fcn, split_name, total_num_examples, features, serializer
 ):
     upper = episodes[-1] + 1
-    upper_str = f'{upper}' if upper < max_episodes else ''
+    upper_str = f"{upper}" if upper < max_episodes else ""
     generator = fcn(split=split_name + f"[{episodes[0]}:{upper_str}]")
     outputs = []
     for key, sample in utils.tqdm(
