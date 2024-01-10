@@ -26,23 +26,23 @@ ulimit -n 20000
 DATASET_TRANSFORMS=(
     "fractal20220817_data 0.1.0 relabel_language"
     "bridge 0.1.0 relabel_language"
-    "kuka 0.1.0 relabel_language"
+    #"kuka 0.1.0 relabel_language" no language
     "taco_play 0.1.0 relabel_language"
     "jaco_play 0.1.0 relabel_language"
-    "berkeley_cable_routing 0.1.0 relabel_language"
-    "roboturk 0.1.0 relabel_language"
-    "nyu_door_opening_surprising_effectiveness 0.1.0 relabel_language"
+    #"berkeley_cable_routing 0.1.0 relabel_language" no language
+    #"roboturk 0.1.0 relabel_language" templated language
+    #"nyu_door_opening_surprising_effectiveness 0.1.0 relabel_language" no language
     "viola 0.1.0 relabel_language"
     "berkeley_autolab_ur5 0.1.0 relabel_language"
-    "toto 0.1.0 relabel_language"
+    #"toto 0.1.0 relabel_language" no language
     "language_table 0.1.0 relabel_language"
     "stanford_hydra_dataset_converted_externally_to_rlds 0.1.0 relabel_language"
-    "austin_buds_dataset_converted_externally_to_rlds 0.1.0 relabel_language"
-    "nyu_franka_play_dataset_converted_externally_to_rlds 0.1.0 relabel_language"
+    #"austin_buds_dataset_converted_externally_to_rlds 0.1.0 relabel_language"
+    #"nyu_franka_play_dataset_converted_externally_to_rlds 0.1.0 relabel_language"
     "furniture_bench_dataset_converted_externally_to_rlds 0.1.0 relabel_language"
     "ucsd_kitchen_dataset_converted_externally_to_rlds 0.1.0 relabel_language"
-    "austin_sailor_dataset_converted_externally_to_rlds 0.1.0 relabel_language"
-    "austin_sirius_dataset_converted_externally_to_rlds 0.1.0 relabel_language"
+    #"austin_sailor_dataset_converted_externally_to_rlds 0.1.0 relabel_language" no language
+    #"austin_sirius_dataset_converted_externally_to_rlds 0.1.0 relabel_language" no language
     "bc_z 1.0.0 relabel_language"
     "dlr_edan_shared_control_converted_externally_to_rlds 0.1.0 relabel_language"
     "iamlab_cmu_pickup_insert_converted_externally_to_rlds 0.1.0 relabel_language"

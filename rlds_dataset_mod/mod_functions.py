@@ -14,8 +14,8 @@ class TfdsModFunction(ABC):
     @classmethod
     @abstractmethod
     def mod_features(
-        cls,
-        features: tfds.features.FeaturesDict,
+            cls,
+            features: tfds.features.FeaturesDict,
     ) -> tfds.features.FeaturesDict:
         """
         Modifies the data builder feature dict to reflect feature changes of ModFunction.
@@ -56,6 +56,7 @@ def mod_obs_features(features, obs_feature_mod_function):
         }
     )
 
+
 def extract_message(res):
     """Parse message content from ChatGPT response."""
     return res.choices[0].message.content
@@ -68,15 +69,21 @@ def ask_chatgpt(messages):
     """
     res = client.chat.completions.create(model="gpt-3.5-turbo",
                                          messages=messages,
-                                         temperature=0)
+                                         temperature=0.3)
     res = extract_message(res)
     return res
+
 
 class RelabelLanguage(TfdsModFunction):
     paraphrase_base_prompt = "This is a command for a robot: %s. " \
                              + "Can you paraphrase it into %d different versions? " \
                              + "Be as diverse as possible without changing the meaning of the command. " \
                              + "Number the results like 1. result, 2. result, etc"
+
+    negatives_prompt = "This is a command for a robot: %s. " \
+                       + "Can you replace the colors of objects in the command with different colors, " \
+                       + "replace spatial relations such as left and right and replace the object name if no color or spatial relation is present? " \
+                       + "Generate %d variants and number them like 1. result, 2. result, etc"
     n_variants = 10
 
     prompt = paraphrase_base_prompt
@@ -92,22 +99,32 @@ class RelabelLanguage(TfdsModFunction):
             cls,
             features: tfds.features.FeaturesDict,
     ) -> tfds.features.FeaturesDict:
-        features["steps"]["observation"]["language_instruction_relabel_0"] = tfds.features.Text()
-        features["steps"]["observation"]["language_instruction_relabel_1"] = tfds.features.Text()
-        features["steps"]["observation"]["language_instruction_relabel_2"] = tfds.features.Text()
-        features["steps"]["observation"]["language_instruction_relabel_3"] = tfds.features.Text()
-        features["steps"]["observation"]["language_instruction_relabel_4"] = tfds.features.Text()
-        features["steps"]["observation"]["language_instruction_relabel_5"] = tfds.features.Text()
-        features["steps"]["observation"]["language_instruction_relabel_6"] = tfds.features.Text()
-        features["steps"]["observation"]["language_instruction_relabel_7"] = tfds.features.Text()
-        features["steps"]["observation"]["language_instruction_relabel_8"] = tfds.features.Text()
-        features["steps"]["observation"]["language_instruction_relabel_9"] = tfds.features.Text()
+        features["steps"]["language_instruction_relabel_0"] = tfds.features.Text()
+        features["steps"]["language_instruction_relabel_1"] = tfds.features.Text()
+        features["steps"]["language_instruction_relabel_2"] = tfds.features.Text()
+        features["steps"]["language_instruction_relabel_3"] = tfds.features.Text()
+        features["steps"]["language_instruction_relabel_4"] = tfds.features.Text()
+        features["steps"]["language_instruction_relabel_5"] = tfds.features.Text()
+        features["steps"]["language_instruction_relabel_6"] = tfds.features.Text()
+        features["steps"]["language_instruction_relabel_7"] = tfds.features.Text()
+        features["steps"]["language_instruction_relabel_8"] = tfds.features.Text()
+        features["steps"]["language_instruction_relabel_9"] = tfds.features.Text()
+        features["steps"]["language_instruction_negative_0"] = tfds.features.Text()
+        features["steps"]["language_instruction_negative_1"] = tfds.features.Text()
+        features["steps"]["language_instruction_negative_2"] = tfds.features.Text()
+        features["steps"]["language_instruction_negative_3"] = tfds.features.Text()
+        features["steps"]["language_instruction_negative_4"] = tfds.features.Text()
+        features["steps"]["language_instruction_negative_5"] = tfds.features.Text()
+        features["steps"]["language_instruction_negative_6"] = tfds.features.Text()
+        features["steps"]["language_instruction_negative_7"] = tfds.features.Text()
+        features["steps"]["language_instruction_negative_8"] = tfds.features.Text()
+        features["steps"]["language_instruction_negative_9"] = tfds.features.Text()
         return features
 
     @classmethod
     def mod_dataset(cls, ds: tf.data.Dataset) -> tf.data.Dataset:
         def relabel_language(step):
-            #hacky way to find out which key is the language key, assuming its inside obs
+            # hacky way to find out which key is the language key, assuming its inside obs
             lang_key_list = [key for key in step["observation"].keys() if "instruction" in key]
             if len(lang_key_list) == 1:
                 lang_key = lang_key_list[0]
@@ -130,25 +147,27 @@ class RelabelLanguage(TfdsModFunction):
             for i, variant in enumerate(parsed_response):
                 step["observation"]["language_instruction_relabel_" + str(i)] = variant
             return step
+
         def episode_map_fn(episode):
             episode["steps"] = episode["steps"].map(relabel_language)
             return episode
 
         return ds.map(episode_map_fn)
 
+
 class ResizeAndJpegEncode(TfdsModFunction):
     MAX_RES: int = 256
 
     @classmethod
     def mod_features(
-        cls,
-        features: tfds.features.FeaturesDict,
+            cls,
+            features: tfds.features.FeaturesDict,
     ) -> tfds.features.FeaturesDict:
         def downsize_and_jpeg(key, feat):
             """Downsizes image features, encodes as jpeg."""
             if len(feat.shape) >= 2 and feat.shape[0] >= 64 and feat.shape[1] >= 64:  # is image / depth feature
                 should_jpeg_encode = (
-                    isinstance(feat, tfds.features.Image) and "depth" not in key
+                        isinstance(feat, tfds.features.Image) and "depth" not in key
                 )
                 if len(feat.shape) > 2:
                     new_shape = (ResizeAndJpegEncode.MAX_RES, ResizeAndJpegEncode.MAX_RES, feat.shape[2])
@@ -179,8 +198,8 @@ class ResizeAndJpegEncode(TfdsModFunction):
             # resize images
             for key in step["observation"]:
                 if len(step["observation"][key].shape) >= 2 and (
-                    step["observation"][key].shape[0] >= 64
-                    or step["observation"][key].shape[1] >= 64
+                        step["observation"][key].shape[0] >= 64
+                        or step["observation"][key].shape[1] >= 64
                 ):
                     size = (ResizeAndJpegEncode.MAX_RES,
                             ResizeAndJpegEncode.MAX_RES)
@@ -208,8 +227,8 @@ class ResizeAndJpegEncode(TfdsModFunction):
 class FilterSuccess(TfdsModFunction):
     @classmethod
     def mod_features(
-        cls,
-        features: tfds.features.FeaturesDict,
+            cls,
+            features: tfds.features.FeaturesDict,
     ) -> tfds.features.FeaturesDict:
         return features  # no feature changes
 
@@ -223,8 +242,8 @@ class FlipImgChannels(TfdsModFunction):
 
     @classmethod
     def mod_features(
-        cls,
-        features: tfds.features.FeaturesDict,
+            cls,
+            features: tfds.features.FeaturesDict,
     ) -> tfds.features.FeaturesDict:
         return features  # no feature changes
 
@@ -241,7 +260,7 @@ class FlipImgChannels(TfdsModFunction):
             return episode
 
         return ds.map(episode_map_fn)
-    
+
 
 class FlipWristImgChannels(FlipImgChannels):
     FLIP_KEYS = ["wrist_image", "hand_image"]
@@ -254,5 +273,3 @@ TFDS_MOD_FUNCTIONS = {
     "flip_image_channels": FlipImgChannels,
     "flip_wrist_image_channels": FlipWristImgChannels,
 }
-
-
