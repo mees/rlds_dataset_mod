@@ -143,6 +143,11 @@ class RelabelLanguage(TfdsModFunction):
             "berkeley_autolab_ur5": "natural_language_instruction",
             "language_table": "instruction",
             "bc_z": "natural_language_instruction",
+            "furniture_bench_dataset_converted_externally_to_rlds": "language_instruction",
+            "ucsd_kitchen_dataset_converted_externally_to_rlds": "language_instruction",
+            "iamlab_cmu_pickup_insert_converted_externally_to_rlds": "language_instruction",
+            "berkeley_fanuc_manipulation": "language_instruction",
+            "cmu_stretch": "language_instruction",
         }
 
         if dataset_name in dataset_instructions:
@@ -159,6 +164,21 @@ class RelabelLanguage(TfdsModFunction):
                     :, :1
                 ].to_tensor()[:, 0]
                 return language_instruction
+            elif (
+                (
+                    dataset_name
+                    == "furniture_bench_dataset_converted_externally_to_rlds"
+                    or dataset_name
+                    == "ucsd_kitchen_dataset_converted_externally_to_rlds"
+                )
+                or (
+                    dataset_name
+                    == "iamlab_cmu_pickup_insert_converted_externally_to_rlds"
+                    or dataset_name == "berkeley_fanuc_manipulation"
+                )
+                or dataset_name == "cmu_stretch"
+            ):
+                return trajectory["step"][dataset_instructions[dataset_name]]
             else:
                 return trajectory["observation"][dataset_instructions[dataset_name]]
         else:
