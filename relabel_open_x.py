@@ -3,9 +3,10 @@ import tensorflow as tf
 import os
 from openai import OpenAI
 import re
+import pickle
 from typing import Any, Dict
 
-# client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 def return_language(dataset_name: str, trajectory: Dict[str, Any]):
     dataset_instructions = {
@@ -91,7 +92,7 @@ for dataset in datasets:
         assert isinstance(original_language, str), "original_language should be a string"
         unique_strings.add(original_language)
         print(unique_strings)
-        # break
+        break
 
 print("unique_strings:", unique_strings)
 
@@ -157,6 +158,9 @@ for lang in unique_strings:
         negative = process_variants(lang, "language_instruction_negative")
         negatives.append(negative)
     lang_augmented_dict[lang] = {"paraphrases": paraphrases, "negatives": negatives}
+
+    with open("augmented_language_labels", 'wb') as f:
+        pickle.dump(lang_augmented_dict, f)
 
 
     # break
