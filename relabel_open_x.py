@@ -60,17 +60,17 @@ def return_language(dataset_name: str, trajectory: Dict[str, Any]):
 
 datasets = (
     "taco_play 0.1.0",
-    # "fractal20220817_data 0.1.0",
-    # "bridge 0.1.0",
-    # "jaco_play 0.1.0",
-    # "berkeley_autolab_ur5 0.1.0",
-    # "language_table 0.1.0",
-    # "furniture_bench_dataset_converted_externally_to_rlds 0.1.0",
-    # "ucsd_kitchen_dataset_converted_externally_to_rlds 0.1.0",
-    # "bc_z 1.0.0",
-    # "iamlab_cmu_pickup_insert_converted_externally_to_rlds 0.1.0",
-    # "berkeley_fanuc_manipulation 0.1.0",
-    # "cmu_stretch 0.1.0",
+    "fractal20220817_data 0.1.0",
+    "bridge 0.1.0",
+    "jaco_play 0.1.0",
+    "berkeley_autolab_ur5 0.1.0",
+    "language_table 0.1.0",
+    "furniture_bench_dataset_converted_externally_to_rlds 0.1.0",
+    "ucsd_kitchen_dataset_converted_externally_to_rlds 0.1.0",
+    "bc_z 1.0.0",
+    "iamlab_cmu_pickup_insert_converted_externally_to_rlds 0.1.0",
+    "berkeley_fanuc_manipulation 0.1.0",
+    "cmu_stretch 0.1.0",
 )
 unique_strings = set()
 for dataset in datasets:
@@ -78,21 +78,19 @@ for dataset in datasets:
     print("dataset:", dataset)
     # create RLDS dataset builder
     if dataset == "bc_z":
-        print("using bc_z")
-        ds = tfds.load("bc_z", data_dir="gs://rail-orca-central2/resize_256_256", split="train[:10]",
+        ds = tfds.load("bc_z", data_dir="gs://rail-orca-central2/resize_256_256", split="all",
                        decoders={"steps": tfds.decode.SkipDecoding()})
     else:
-        ds = tfds.load(dataset, data_dir="gs://gresearch/robotics/", split="train[:10]",
+        ds = tfds.load(dataset, data_dir="gs://gresearch/robotics/", split="all",
                        decoders={"steps": tfds.decode.SkipDecoding()})
     for element in iter(ds):
         original_language_tensor = return_language(dataset, element["steps"])
-        print(original_language_tensor)
+        #print(original_language_tensor)
         original_language = original_language_tensor[0].numpy().decode()
-        print(original_language)
+        #print(original_language)
         assert isinstance(original_language, str), "original_language should be a string"
         unique_strings.add(original_language)
-        print(unique_strings)
-        break
+
 
 print("unique_strings:", unique_strings)
 
@@ -145,23 +143,19 @@ def process_variants(original_language, variant_type):
     parsed_response = parse_response(res)
     return parsed_response
 
+print("Starting to query GPT-3.5...")
 k = 5
 lang_augmented_dict = {}
 for lang in unique_strings:
-    print("lang:", lang)
+    # print("lang:", lang)
     paraphrases = []
     negatives = []
     for i in range(k):
-        print("i:", i)
         paraphrase = process_variants(lang, "language_instruction_relabel")
         paraphrases.append(paraphrase)
         negative = process_variants(lang, "language_instruction_negative")
         negatives.append(negative)
     lang_augmented_dict[lang] = {"paraphrases": paraphrases, "negatives": negatives}
 
-    with open("augmented_language_labels", 'wb') as f:
-        pickle.dump(lang_augmented_dict, f)
-
-
-    # break
-
+with open("augmented_language_labels", 'wb') as f:
+    pickle.dump(lang_augmented_dict, f)
