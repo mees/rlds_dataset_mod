@@ -5,6 +5,7 @@ from openai import OpenAI
 import re
 import pickle
 from typing import Any, Dict
+from tqdm import tqdm
 
 client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
@@ -64,7 +65,7 @@ datasets = (
     "bridge 0.1.0",
     "jaco_play 0.1.0",
     "berkeley_autolab_ur5 0.1.0",
-    "language_table 0.1.0",
+    #"language_table 0.1.0",
     "furniture_bench_dataset_converted_externally_to_rlds 0.1.0",
     "ucsd_kitchen_dataset_converted_externally_to_rlds 0.1.0",
     "bc_z 1.0.0",
@@ -146,7 +147,7 @@ def process_variants(original_language, variant_type):
 print("Starting to query GPT-3.5...")
 k = 5
 lang_augmented_dict = {}
-for lang in unique_strings:
+for lang in tqdm(unique_strings):
     # print("lang:", lang)
     paraphrases = []
     negatives = []
