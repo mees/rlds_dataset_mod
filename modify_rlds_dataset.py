@@ -35,7 +35,7 @@ def mod_dataset_generator(builder, split, mods):
     """Modifies dataset features."""
     ds = builder.as_dataset(split=split)
     for mod in mods:
-        ds = TFDS_MOD_FUNCTIONS[mod].mod_dataset(ds, builder.name)
+        ds = TFDS_MOD_FUNCTIONS[mod].mod_dataset(ds)
     for episode in tfds.core.dataset_utils.as_numpy(ds):
         yield episode
 
@@ -47,15 +47,13 @@ def main(_):
     print("############# Target features: ###############")
     print(features)
     print("##############################################")
-    assert FLAGS.data_dir != FLAGS.target_dir  # prevent overwriting original dataset
+    assert FLAGS.data_dir != FLAGS.target_dir   # prevent overwriting original dataset
 
     mod_dataset_builder = MultiThreadedAdhocDatasetBuilder(
         name=FLAGS.dataset,
         version=builder.version,
         features=features,
-        split_datasets={
-            split: builder.info.splits[split] for split in builder.info.splits
-        },
+        split_datasets={split: builder.info.splits[split] for split in builder.info.splits},
         config=builder.builder_config,
         data_dir=FLAGS.target_dir,
         description=builder.info.description,
