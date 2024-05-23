@@ -4,11 +4,11 @@ import dlimp as dl
 import tensorflow as tf
 import tensorflow_datasets as tfds
 import os
-from openai import OpenAI
+#from openai import OpenAI
 import re
 from typing import Any, Dict
 
-client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+#client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 
 class TfdsModFunction(ABC):
