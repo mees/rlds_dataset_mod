@@ -9,17 +9,17 @@ def flatten(lst):
             flat_list.append(item)
     return flat_list
 
-with open("augmented_language_labels_aloha", 'rb') as file:
+with open("aloha_play_rephrasings", 'rb') as file:
   aloha_para = pickle.load(file)
 
 
 new_dict={}
 
 for k, v in aloha_para.items():
-    my_list = v['paraphrases']
+    my_list = v
     flattened_list = flatten(my_list)
     unique_elem = list(set(flattened_list))
     new_dict[k] = ''.join(unique_elem)
 
-with open("augmented_language_labels_aloha_octo_format", 'wb') as f:
+with open("aloha_play_rephrasings_octo_format", 'wb') as f:
     pickle.dump(new_dict, f)
