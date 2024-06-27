@@ -279,6 +279,7 @@ class VisualTrajectory(TfdsModFunction):
             # file_path = episode['episode_metadata']['file_path'].numpy()
 
             # Accessing symbolic tensor values using tf.py_function
+            @tf.py_function(Tout=tf.string)
             def access_tensor_value(tensor):
                 print("eagerly1: ", tf.executing_eagerly())
                 print(tensor)
@@ -287,7 +288,7 @@ class VisualTrajectory(TfdsModFunction):
                 else:
                     print("Episode not found")
                 return tensor
-            file_path = tf.py_function(access_tensor_value, [episode['episode_metadata']['file_path']], tf.string)
+            file_path = access_tensor_value(episode['episode_metadata']['file_path'])
             # file_path = tf.get_static_value(episode['episode_metadata']['file_path'])
             # print(type(file_path))
             print(file_path)
