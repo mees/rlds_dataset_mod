@@ -288,7 +288,7 @@ class VisualTrajectory(TfdsModFunction):
             # print(file_path)
             my_value = VisualTrajectory.hash_table.lookup(episode['episode_metadata']['file_path'])
             print(type(my_value))
-            print(my_value['0'])
+            # print(my_value['0'])
             # if file_path in VisualTrajectory.gripper_pos_lookup:
             #     print("Episode found")
             # else:
