@@ -263,19 +263,20 @@ class VisualTrajectory(TfdsModFunction):
             return trajectory_image
 
         def episode_map_fn(episode):
-            print("eagerly1: ", tf.executing_eagerly())
-            tf.config.run_functions_eagerly(True)
-            print("eagerly2: ", tf.executing_eagerly())
-            print(episode.keys())
-            print(episode['episode_metadata'])
-            print(episode['episode_metadata'].keys())
+            # print("eagerly1: ", tf.executing_eagerly())
+            # tf.config.run_functions_eagerly(True)
+            # print("eagerly2: ", tf.executing_eagerly())
+            # print(episode.keys())
+            # print(episode['episode_metadata'])
+            # print(episode['episode_metadata'].keys())
             # Convert tensor to numpy for hashable comparison
             # file_path = episode['episode_metadata']['file_path'].numpy()
 
             # Accessing symbolic tensor values using tf.py_function
-            def access_tensor_value(tensor):
-                return tensor.numpy()
-            file_path = tf.py_function(access_tensor_value, [episode['episode_metadata']['file_path']], tf.string)
+            # def access_tensor_value(tensor):
+            #     return tensor.numpy()
+            # file_path = tf.py_function(access_tensor_value, [episode['episode_metadata']['file_path']], tf.string)
+            file_path = tf.get_static_value(episode['episode_metadata']['file_path'])
             print(type(file_path))
             print(file_path)
             if file_path in VisualTrajectory.gripper_pos_lookup:
