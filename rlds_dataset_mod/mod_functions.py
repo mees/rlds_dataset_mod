@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 import dlimp as dl
 import tensorflow as tf
 import tensorflow_datasets as tfds
+import json
 import os
 #from openai import OpenAI
 import re
@@ -58,167 +59,192 @@ def mod_obs_features(features, obs_feature_mod_function):
     )
 
 
-def extract_message(res):
-    """Parse message content from ChatGPT response."""
-    return res.choices[0].message.content
+# def extract_message(res):
+#     """Parse message content from ChatGPT response."""
+#     return res.choices[0].message.content
+#
+#
+# def ask_chatgpt(messages):
+#     """
+#     Prompts ChatGPT with the list of messages.
+#     Returns the response.
+#     """
+#     res = client.chat.completions.create(
+#         model="gpt-3.5-turbo", messages=messages, temperature=0.3
+#     )
+#     res = extract_message(res)
+#     return res
+#
+#
+# class RelabelLanguage(TfdsModFunction):
+#     prompt_paraphrase = (
+#         "This is a command for a robot: %s. "
+#         + "Can you paraphrase it into %d different versions? "
+#         + "Be as diverse as possible without changing the meaning of the command. "
+#         + "Number the results like 1. result, 2. result, etc"
+#     )
+#
+#     negatives_prompt = (
+#         "This is a command for a robot: %s. "
+#         + "Can you replace the colors of objects in the command with different colors, "
+#         + "replace spatial relations such as left and right and replace the object name if no color or spatial relation is present? "
+#         + "Generate %d variants and number them like 1. result, 2. result, etc"
+#     )
+#     n_variants = 10
+#
+#     def parse_response(response):
+#         pattern = r"\d+\.\s(.+)"  # Match any text following a digit and period
+#         # Find all matches in the response
+#         matches = re.findall(pattern, response)
+#         return matches
+#
+#     @classmethod
+#     def mod_features(
+#         cls,
+#         features: tfds.features.FeaturesDict,
+#     ) -> tfds.features.FeaturesDict:
+#         language_instruction_features = {
+#             f"language_instruction_{label}_{i}": tfds.features.Text()
+#             for label in ["relabel", "negative"]
+#             for i in range(10)
+#         }
+#         return tfds.features.FeaturesDict(
+#             {
+#                 "steps": tfds.features.Dataset(
+#                     {
+#                         "observation": tfds.features.FeaturesDict(
+#                             {
+#                                 key: features["steps"]["observation"][key]
+#                                 for key in features["steps"]["observation"].keys()
+#                             }
+#                         ),
+#                         **{
+#                             key: features["steps"][key]
+#                             for key in features["steps"].keys()
+#                             if key not in ("observation",)
+#                         },
+#                         **language_instruction_features,
+#                     }
+#                 ),
+#                 **{
+#                     key: features[key]
+#                     for key in features.keys()
+#                     if key not in ("steps",)
+#                 },
+#             }
+#         )
+#
+#     @staticmethod
+#     def return_language(dataset_name: str, trajectory: Dict[str, Any]):
+#         dataset_instructions = {
+#             "taco_play": "natural_language_instruction",
+#             "bridge_dataset": "natural_language_instruction",
+#             "fractal20220817_data": "natural_language_instruction",
+#             "jaco_play": "natural_language_instruction",
+#             "berkeley_autolab_ur5": "natural_language_instruction",
+#             "language_table": "instruction",
+#             "bc_z": "natural_language_instruction",
+#             "furniture_bench_dataset_converted_externally_to_rlds": "language_instruction",
+#             "ucsd_kitchen_dataset_converted_externally_to_rlds": "language_instruction",
+#             "iamlab_cmu_pickup_insert_converted_externally_to_rlds": "language_instruction",
+#             "berkeley_fanuc_manipulation": "language_instruction",
+#             "cmu_stretch": "language_instruction",
+#         }
+#
+#         if dataset_name in dataset_instructions:
+#             if dataset_name == "language_table":
+#                 # decode language instruction
+#                 instruction_bytes = trajectory["observation"][
+#                     dataset_instructions[dataset_name]
+#                 ]
+#                 instruction_encoded = tf.strings.unicode_encode(
+#                     instruction_bytes, output_encoding="UTF-8"
+#                 )
+#                 # Remove trailing padding --> convert RaggedTensor to regular Tensor.
+#                 language_instruction = tf.strings.split(instruction_encoded, "\x00")[
+#                     :, :1
+#                 ].to_tensor()[:, 0]
+#                 return language_instruction
+#             elif (
+#                 (
+#                     dataset_name
+#                     == "furniture_bench_dataset_converted_externally_to_rlds"
+#                     or dataset_name
+#                     == "ucsd_kitchen_dataset_converted_externally_to_rlds"
+#                 )
+#                 or (
+#                     dataset_name
+#                     == "iamlab_cmu_pickup_insert_converted_externally_to_rlds"
+#                     or dataset_name == "berkeley_fanuc_manipulation"
+#                 )
+#                 or dataset_name == "cmu_stretch"
+#             ):
+#                 return trajectory["step"][dataset_instructions[dataset_name]]
+#             else:
+#                 return trajectory["observation"][dataset_instructions[dataset_name]]
+#         else:
+#             # Handle unknown dataset_name here
+#             return None  # or raise an exception, depending on your needs
+#
+#     def get_prompt(variant_type, original_language):
+#         prompt_format = (
+#             RelabelLanguage.prompt_paraphrase
+#             if variant_type == "language_instruction_relabel"
+#             else RelabelLanguage.negatives_prompt
+#         )
+#         return prompt_format % (original_language, RelabelLanguage.n_variants)
+#
+#     @classmethod
+#     def mod_dataset(cls, ds: tf.data.Dataset, dataset_name: str) -> tf.data.Dataset:
+#         cls.dataset_name = dataset_name
+#
+#         def relabel_language(step):
+#             original_language = RelabelLanguage.return_language(cls.dataset_name, step)
+#             # print("ORIGINAL:", original_language)
+#             process_variants(step, original_language, "language_instruction_relabel")
+#             process_variants(step, original_language, "language_instruction_negative")
+#             return step
+#
+#         def process_variants(step, original_language, variant_type):
+#             prompt = RelabelLanguage.get_prompt(variant_type, original_language)
+#             messages = [{"role": "user", "content": prompt}]
+#             res = ask_chatgpt(messages)
+#             parsed_response = RelabelLanguage.parse_response(res)
+#             for i, variant in enumerate(parsed_response):
+#                 step["observation"][f"{variant_type}_{i}"] = variant
+#             return step
+#
+#         def episode_map_fn(episode):
+#             episode["steps"] = episode["steps"].map(relabel_language)
+#             return episode
+#
+#         return ds.map(episode_map_fn)
 
-
-def ask_chatgpt(messages):
-    """
-    Prompts ChatGPT with the list of messages.
-    Returns the response.
-    """
-    res = client.chat.completions.create(
-        model="gpt-3.5-turbo", messages=messages, temperature=0.3
-    )
-    res = extract_message(res)
-    return res
-
-
-class RelabelLanguage(TfdsModFunction):
-    prompt_paraphrase = (
-        "This is a command for a robot: %s. "
-        + "Can you paraphrase it into %d different versions? "
-        + "Be as diverse as possible without changing the meaning of the command. "
-        + "Number the results like 1. result, 2. result, etc"
-    )
-
-    negatives_prompt = (
-        "This is a command for a robot: %s. "
-        + "Can you replace the colors of objects in the command with different colors, "
-        + "replace spatial relations such as left and right and replace the object name if no color or spatial relation is present? "
-        + "Generate %d variants and number them like 1. result, 2. result, etc"
-    )
-    n_variants = 10
-
-    def parse_response(response):
-        pattern = r"\d+\.\s(.+)"  # Match any text following a digit and period
-        # Find all matches in the response
-        matches = re.findall(pattern, response)
-        return matches
+class VisualTrajectory(TfdsModFunction):
+    gripper_pos = json.load(open("/home/oiermees/bridge_labeled_dataset_1.json","r"))
+    TRAJECTORY_IMAGE_SHAPE = (256, 256, 3)
+    @classmethod
+    def mod_features(cls, features: tfds.features.FeaturesDict) -> tfds.features.FeaturesDict:
+        # Adding the new field for visual trajectory
+        features['visual_trajectory'] = tfds.features.Image(shape=VisualTrajectory.TRAJECTORY_IMAGE_SHAPE, dtype=tf.uint8)
+        return features
 
     @classmethod
-    def mod_features(
-        cls,
-        features: tfds.features.FeaturesDict,
-    ) -> tfds.features.FeaturesDict:
-        language_instruction_features = {
-            f"language_instruction_{label}_{i}": tfds.features.Text()
-            for label in ["relabel", "negative"]
-            for i in range(10)
-        }
-        return tfds.features.FeaturesDict(
-            {
-                "steps": tfds.features.Dataset(
-                    {
-                        "observation": tfds.features.FeaturesDict(
-                            {
-                                key: features["steps"]["observation"][key]
-                                for key in features["steps"]["observation"].keys()
-                            }
-                        ),
-                        **{
-                            key: features["steps"][key]
-                            for key in features["steps"].keys()
-                            if key not in ("observation",)
-                        },
-                        **language_instruction_features,
-                    }
-                ),
-                **{
-                    key: features[key]
-                    for key in features.keys()
-                    if key not in ("steps",)
-                },
-            }
-        )
-
-    @staticmethod
-    def return_language(dataset_name: str, trajectory: Dict[str, Any]):
-        dataset_instructions = {
-            "taco_play": "natural_language_instruction",
-            "bridge_dataset": "natural_language_instruction",
-            "fractal20220817_data": "natural_language_instruction",
-            "jaco_play": "natural_language_instruction",
-            "berkeley_autolab_ur5": "natural_language_instruction",
-            "language_table": "instruction",
-            "bc_z": "natural_language_instruction",
-            "furniture_bench_dataset_converted_externally_to_rlds": "language_instruction",
-            "ucsd_kitchen_dataset_converted_externally_to_rlds": "language_instruction",
-            "iamlab_cmu_pickup_insert_converted_externally_to_rlds": "language_instruction",
-            "berkeley_fanuc_manipulation": "language_instruction",
-            "cmu_stretch": "language_instruction",
-        }
-
-        if dataset_name in dataset_instructions:
-            if dataset_name == "language_table":
-                # decode language instruction
-                instruction_bytes = trajectory["observation"][
-                    dataset_instructions[dataset_name]
-                ]
-                instruction_encoded = tf.strings.unicode_encode(
-                    instruction_bytes, output_encoding="UTF-8"
-                )
-                # Remove trailing padding --> convert RaggedTensor to regular Tensor.
-                language_instruction = tf.strings.split(instruction_encoded, "\x00")[
-                    :, :1
-                ].to_tensor()[:, 0]
-                return language_instruction
-            elif (
-                (
-                    dataset_name
-                    == "furniture_bench_dataset_converted_externally_to_rlds"
-                    or dataset_name
-                    == "ucsd_kitchen_dataset_converted_externally_to_rlds"
-                )
-                or (
-                    dataset_name
-                    == "iamlab_cmu_pickup_insert_converted_externally_to_rlds"
-                    or dataset_name == "berkeley_fanuc_manipulation"
-                )
-                or dataset_name == "cmu_stretch"
-            ):
-                return trajectory["step"][dataset_instructions[dataset_name]]
-            else:
-                return trajectory["observation"][dataset_instructions[dataset_name]]
-        else:
-            # Handle unknown dataset_name here
-            return None  # or raise an exception, depending on your needs
-
-    def get_prompt(variant_type, original_language):
-        prompt_format = (
-            RelabelLanguage.prompt_paraphrase
-            if variant_type == "language_instruction_relabel"
-            else RelabelLanguage.negatives_prompt
-        )
-        return prompt_format % (original_language, RelabelLanguage.n_variants)
-
-    @classmethod
-    def mod_dataset(cls, ds: tf.data.Dataset, dataset_name: str) -> tf.data.Dataset:
-        cls.dataset_name = dataset_name
-
-        def relabel_language(step):
-            original_language = RelabelLanguage.return_language(cls.dataset_name, step)
-            # print("ORIGINAL:", original_language)
-            process_variants(step, original_language, "language_instruction_relabel")
-            process_variants(step, original_language, "language_instruction_negative")
-            return step
-
-        def process_variants(step, original_language, variant_type):
-            prompt = RelabelLanguage.get_prompt(variant_type, original_language)
-            messages = [{"role": "user", "content": prompt}]
-            res = ask_chatgpt(messages)
-            parsed_response = RelabelLanguage.parse_response(res)
-            for i, variant in enumerate(parsed_response):
-                step["observation"][f"{variant_type}_{i}"] = variant
-            return step
+    def mod_dataset(cls, ds: tf.data.Dataset) -> tf.data.Dataset:
+        def create_visual_trajectory(steps):
+            # Example function to create a visual trajectory from steps
+            # This should be replaced with actual logic to create the trajectory image
+            trajectory_image = tf.zeros(VisualTrajectory.TRAJECTORY_IMAGE_SHAPE, dtype=tf.uint8)
+            return trajectory_image
 
         def episode_map_fn(episode):
-            episode["steps"] = episode["steps"].map(relabel_language)
+            print(episode.keys())
+            breakpoint()
+            visual_trajectory = create_visual_trajectory(episode['steps'])
+            episode['visual_trajectory'] = visual_trajectory
             return episode
 
         return ds.map(episode_map_fn)
-
 
 class ResizeAndJpegEncode(TfdsModFunction):
     MAX_RES: int = 256
@@ -340,7 +366,8 @@ class FlipWristImgChannels(FlipImgChannels):
 
 
 TFDS_MOD_FUNCTIONS = {
-    "relabel_language": RelabelLanguage,
+    #"relabel_language": RelabelLanguage,
+    "visual_trajectory": VisualTrajectory,
     "resize_and_jpeg_encode": ResizeAndJpegEncode,
     "filter_success": FilterSuccess,
     "flip_image_channels": FlipImgChannels,
