@@ -263,7 +263,9 @@ class VisualTrajectory(TfdsModFunction):
             return trajectory_image
 
         def episode_map_fn(episode):
+            print("eagerly1: ", tf.executing_eagerly())
             tf.config.run_functions_eagerly(True)
+            print("eagerly2: ", tf.executing_eagerly())
             print(episode.keys())
             print(episode['episode_metadata'])
             print(episode['episode_metadata'].keys())
