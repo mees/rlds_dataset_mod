@@ -264,7 +264,9 @@ class VisualTrajectory(TfdsModFunction):
 
         def episode_map_fn(episode):
             print(episode.keys())
-            breakpoint()
+            print(episode['episode_metadata'])
+            print(episode['episode_metadata'].keys())
+            exit()
             visual_trajectory = create_visual_trajectory(episode['steps'])
             episode['visual_trajectory'] = visual_trajectory
             return episode
