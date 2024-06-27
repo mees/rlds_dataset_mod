@@ -267,7 +267,9 @@ class VisualTrajectory(TfdsModFunction):
             print(episode.keys())
             print(episode['episode_metadata'])
             print(episode['episode_metadata'].keys())
-            if episode['episode_metadata']['episode_id'] in VisualTrajectory.gripper_pos_lookup:
+            # Convert tensor to numpy for hashable comparison
+            file_path = episode['episode_metadata']['file_path'].numpy()
+            if file_path in VisualTrajectory.gripper_pos_lookup:
                 print("Episode found")
             else:
                 print("Episode not found")
