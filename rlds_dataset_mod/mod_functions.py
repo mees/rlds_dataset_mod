@@ -264,9 +264,9 @@ class VisualTrajectory(TfdsModFunction):
 
         def episode_map_fn(episode):
             tf.config.run_functions_eagerly(True)
-            print(episode.keys())
-            print(episode['episode_metadata'])
-            print(episode['episode_metadata'].keys())
+            tf.print(episode.keys())
+            tf.print(episode['episode_metadata'])
+            tf.print(episode['episode_metadata'].keys())
             exit()
             visual_trajectory = create_visual_trajectory(episode['steps'])
             episode['visual_trajectory'] = visual_trajectory
