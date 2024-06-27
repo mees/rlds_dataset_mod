@@ -268,8 +268,9 @@ class VisualTrajectory(TfdsModFunction):
             trajectory_image = tf.zeros(VisualTrajectory.TRAJECTORY_IMAGE_SHAPE, dtype=tf.uint8)
             return trajectory_image
 
-        @tf.py_function(Tout=tf.data.Dataset)
+        # @tf.py_function(Tout=tf.data.Dataset)
         def episode_map_fn(episode):
+            print(type(episode))
             print("eagerly1: ", tf.executing_eagerly())
             # tf.config.run_functions_eagerly(True)
             # print("eagerly2: ", tf.executing_eagerly())
