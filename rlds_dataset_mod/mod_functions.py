@@ -222,12 +222,12 @@ def mod_obs_features(features, obs_feature_mod_function):
 
 class VisualTrajectory(TfdsModFunction):
     gripper_pos_lookup = json.load(open("/home/oiermees/bridge_labeled_dataset_1.json","r"))
-    keys = list(gripper_pos_lookup.keys())
-    values = list(gripper_pos_lookup.keys())
-    initializer = tf.lookup.KeyValueTensorInitializer(
-         keys, values, key_dtype=tf.string, value_dtype=tf.string
-    )
-    hash_table = tf.lookup.StaticHashTable(initializer, default_value="")
+    # keys = list(gripper_pos_lookup.keys())
+    # values = list(gripper_pos_lookup.keys())
+    # initializer = tf.lookup.KeyValueTensorInitializer(
+    #      keys, values, key_dtype=tf.string, value_dtype=tf.string
+    # )
+    # hash_table = tf.lookup.StaticHashTable(initializer, default_value="")
 
     TRAJECTORY_IMAGE_SHAPE = (256, 256, 3)
     @classmethod
@@ -283,11 +283,12 @@ class VisualTrajectory(TfdsModFunction):
             # def access_tensor_value(tensor):
             #     return tensor.numpy()
             # file_path = tf.py_function(access_tensor_value, [episode['episode_metadata']['file_path']], tf.string)
-            # file_path = tf.get_static_value(episode['episode_metadata']['file_path'])
+            file_path = tf.get_static_value(episode['episode_metadata']['file_path'])
             # print(type(file_path))
-            # print(file_path)
-            my_value = VisualTrajectory.hash_table.lookup(episode['episode_metadata']['file_path'])
-            print(my_value)
+            print(file_path)
+            print(episode['episode_metadata']['file_path'])
+            # my_value = VisualTrajectory.hash_table.lookup(episode['episode_metadata']['file_path'])
+            # print(my_value)
             # print(my_value.keys())
             # print(my_value['0'])
             # if file_path in VisualTrajectory.gripper_pos_lookup:
