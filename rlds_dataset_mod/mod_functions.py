@@ -268,7 +268,12 @@ class VisualTrajectory(TfdsModFunction):
             print(episode['episode_metadata'])
             print(episode['episode_metadata'].keys())
             # Convert tensor to numpy for hashable comparison
-            file_path = episode['episode_metadata']['file_path'].numpy()
+            # file_path = episode['episode_metadata']['file_path'].numpy()
+
+            # Accessing symbolic tensor values using tf.py_function
+            def access_tensor_value(tensor):
+                return tensor.numpy()
+            file_path = tf.py_function(access_tensor_value, [episode['episode_metadata']['file_path']], tf.int32)
             if file_path in VisualTrajectory.gripper_pos_lookup:
                 print("Episode found")
             else:
