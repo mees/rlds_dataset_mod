@@ -301,7 +301,7 @@ class VisualTrajectory(TfdsModFunction):
             #     print("Episode found")
             # else:
             #     print("Episode not found")
-            # exit()
+            exit()
             # visual_trajectory = create_visual_trajectory(episode['steps'])
             # episode['visual_trajectory'] = visual_trajectory
             return episode
