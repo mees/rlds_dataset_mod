@@ -270,8 +270,6 @@ class VisualTrajectory(TfdsModFunction):
 
         # @tf.py_function(Tout=tf.data.Dataset)
         def episode_map_fn(episode):
-            print(type(episode))
-            print("eagerly1: ", tf.executing_eagerly())
             # tf.config.run_functions_eagerly(True)
             # print("eagerly2: ", tf.executing_eagerly())
             # print(episode.keys())
@@ -282,6 +280,7 @@ class VisualTrajectory(TfdsModFunction):
 
             # Accessing symbolic tensor values using tf.py_function
             def access_tensor_value(tensor):
+                print("eagerly1: ", tf.executing_eagerly())
                 print(tensor)
                 if tensor in VisualTrajectory.gripper_pos_lookup:
                     print("Episode found")
