@@ -17,6 +17,7 @@ from tensorflow_datasets.core import split_builder as split_builder_lib
 from tensorflow_datasets.core import splits as splits_lib
 from tensorflow_datasets.core import utils
 from tensorflow_datasets.core import writer as writer_lib
+tf.config.run_functions_eagerly(True)
 
 Key = Union[str, int]
 # The nested example dict passed to `features.encode_example`
