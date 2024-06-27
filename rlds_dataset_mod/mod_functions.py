@@ -226,8 +226,33 @@ class VisualTrajectory(TfdsModFunction):
     @classmethod
     def mod_features(cls, features: tfds.features.FeaturesDict) -> tfds.features.FeaturesDict:
         # Adding the new field for visual trajectory
-        features['visual_trajectory'] = tfds.features.Image(shape=VisualTrajectory.TRAJECTORY_IMAGE_SHAPE, dtype=tf.uint8)
         return features
+        # visual_trajectory = tfds.features.Image(shape=VisualTrajectory.TRAJECTORY_IMAGE_SHAPE, dtype=tf.uint8)
+        # return tfds.features.FeaturesDict(
+        #                 {
+        #                     "steps": tfds.features.Dataset(
+        #                         {
+        #                             "observation": tfds.features.FeaturesDict(
+        #                                 {
+        #                                     key: features["steps"]["observation"][key]
+        #                                     for key in features["steps"]["observation"].keys()
+        #                                 }
+        #                             ),
+        #                             **{
+        #                                 key: features["steps"][key]
+        #                                 for key in features["steps"].keys()
+        #                                 if key not in ("observation",)
+        #                             },
+        #                             **visual_trajectory,
+        #                         }
+        #                     ),
+        #                     **{
+        #                         key: features[key]
+        #                         for key in features.keys()
+        #                         if key not in ("steps",)
+        #                     },
+        #                 }
+        #             )
 
     @classmethod
     def mod_dataset(cls, ds: tf.data.Dataset) -> tf.data.Dataset:
