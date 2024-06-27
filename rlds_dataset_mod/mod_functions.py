@@ -223,7 +223,7 @@ def mod_obs_features(features, obs_feature_mod_function):
 class VisualTrajectory(TfdsModFunction):
     gripper_pos_lookup = json.load(open("/home/oiermees/bridge_labeled_dataset_1.json","r"))
     keys = list(gripper_pos_lookup.keys())
-    values = list(gripper_pos_lookup.values())
+    values = list(gripper_pos_lookup.keys())
     initializer = tf.lookup.KeyValueTensorInitializer(
          keys, values, key_dtype=tf.string, value_dtype=tf.string
     )
