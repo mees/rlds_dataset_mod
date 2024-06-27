@@ -273,7 +273,9 @@ class VisualTrajectory(TfdsModFunction):
             # Accessing symbolic tensor values using tf.py_function
             def access_tensor_value(tensor):
                 return tensor.numpy()
-            file_path = tf.py_function(access_tensor_value, [episode['episode_metadata']['file_path']], tf.int32)
+            file_path = tf.py_function(access_tensor_value, [episode['episode_metadata']['file_path']], tf.string)
+            print(type(file_path))
+            print(file_path)
             if file_path in VisualTrajectory.gripper_pos_lookup:
                 print("Episode found")
             else:
