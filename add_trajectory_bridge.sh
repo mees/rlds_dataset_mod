@@ -20,5 +20,5 @@ MAX_EPISODES_IN_MEMORY=200    # number of episodes converted in parallel --> adj
 # increase limit on number of files opened in parallel to 20k --> conversion opens up to 1k temporary files
 # in /tmp to store dataset during conversion
 ulimit -n 20000
-python3 modify_rlds_dataset.py --dataset=bridge_dataset --data_dir=/shared/karl/data/bridge_orig/ --target_dir=$CONVERSION_DIR --mods=visual_trajectory --n_workers=$N_WORKERS --max_episodes_in_memory=$MAX_EPISODES_IN_MEMORY
+python3 modify_rlds_dataset.py --dataset=bridge_orig --data_dir=/shared/karl/data/ --target_dir=$CONVERSION_DIR --mods=visual_trajectory --n_workers=$N_WORKERS --max_episodes_in_memory=$MAX_EPISODES_IN_MEMORY
 
