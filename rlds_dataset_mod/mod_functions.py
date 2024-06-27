@@ -221,7 +221,7 @@ def mod_obs_features(features, obs_feature_mod_function):
 #         return ds.map(episode_map_fn)
 
 class VisualTrajectory(TfdsModFunction):
-    gripper_pos = json.load(open("/home/oiermees/bridge_labeled_dataset_1.json","r"))
+    gripper_pos_lookup = json.load(open("/home/oiermees/bridge_labeled_dataset_1.json","r"))
     TRAJECTORY_IMAGE_SHAPE = (256, 256, 3)
     @classmethod
     def mod_features(cls, features: tfds.features.FeaturesDict) -> tfds.features.FeaturesDict:
@@ -267,6 +267,10 @@ class VisualTrajectory(TfdsModFunction):
             print(episode.keys())
             print(episode['episode_metadata'])
             print(episode['episode_metadata'].keys())
+            if episode['episode_metadata']['episode_id'] in VisualTrajectory.gripper_pos_lookup:
+                print("Episode found")
+            else:
+                print("Episode not found")
             exit()
             visual_trajectory = create_visual_trajectory(episode['steps'])
             episode['visual_trajectory'] = visual_trajectory
