@@ -10,7 +10,6 @@ import re
 from typing import Any, Dict
 
 #client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
-tf.config.run_functions_eagerly(True)
 
 class TfdsModFunction(ABC):
     @classmethod
@@ -269,6 +268,7 @@ class VisualTrajectory(TfdsModFunction):
             trajectory_image = tf.zeros(VisualTrajectory.TRAJECTORY_IMAGE_SHAPE, dtype=tf.uint8)
             return trajectory_image
 
+        @tf.py_function(Tout=tf.data.Dataset)
         def episode_map_fn(episode):
             print("eagerly1: ", tf.executing_eagerly())
             # tf.config.run_functions_eagerly(True)
@@ -295,9 +295,9 @@ class VisualTrajectory(TfdsModFunction):
             #     print("Episode found")
             # else:
             #     print("Episode not found")
-            exit()
-            visual_trajectory = create_visual_trajectory(episode['steps'])
-            episode['visual_trajectory'] = visual_trajectory
+            # exit()
+            # visual_trajectory = create_visual_trajectory(episode['steps'])
+            # episode['visual_trajectory'] = visual_trajectory
             return episode
 
         return ds.map(episode_map_fn)
